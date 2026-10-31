@@ -1,0 +1,25 @@
+\section{Methodology}
+\label{sec:method}
+
+\para{Problem formulation.} A system prompt contains a list of instructions $I = (i_1, \dots, i_k)$, and a model produces a response $r$ to a user task $t$. A verifier $v_i(r) \in \{0, 1\}$ marks whether $r$ satisfies instruction $i$. We report two metrics in percent. {\bf Per-instruction compliance} is the mean of $v_i(r)$ over all (response, instruction) pairs. {\bf All-satisfied rate} is the share of responses with $\prod_{i \in I} v_i(r) = 1$. Differences are in percentage points (pp).
+
+\para{Instruction pool and tasks.} \Tabref{tab:instructions} lists our 10 instructions, grouped as format/length (F/L, 4 instructions) and persona/style (P/S, 6 instructions). Each system prompt is the sentence ``You are a helpful assistant. Follow all of these instructions in every response:'' followed by one instruction per line. The user turn is one of 40 neutral requests that we wrote by hand, such as ``Explain why the sky is blue.'', to avoid benchmark contamination.
+
+\input{tables/instructions}
+
+\para{Experiments.} We use seed 42 and 5,120 prompts per model.
+\begin{itemize}[leftmargin=*,itemsep=0pt,topsep=0pt]
+    \item {\bf E1 Load curve (2,400 prompts).} We use $k \in \{1,2,3,5,7,10\}$ with 400 prompts per value. For $k=1$, every instruction meets every task. For $k>1$, we sample random subsets in random order. At $k=10$ the subset is always the full pool, so only order and task vary.
+    \item {\bf E2 Pairwise interference (720 prompts).} We run all 45 pairs in both orders on 8 tasks. We compare each response with the same instruction on the same task alone (from E1, $k=1$), which gives a paired difference.
+    \item {\bf E3 Position (800 prompts).} For each of the 10 targets and 40 tasks, we place the target first or last among 5 instructions. The other 4 instructions and their order are identical in both versions.
+    \item {\bf E4 Repetition (1,200 prompts).} The base condition has 5 instructions with the target in a random slot. The repeat condition inserts a second copy of the target in a random non-adjacent slot. The filler condition puts the neutral line ``Be accurate and helpful.'' in the same slot. We choose this control because it separates repetition from simply making the prompt longer.
+    \item {\bf Robustness (2,000 prompts per model).} We render E1 ($k=1,5,10$) and E3 as a numbered list on \qone, \qthree, \lthree, and \qeight.
+\end{itemize}
+
+\para{Models.} \Tabref{tab:models} lists the models. No API keys were available, so we run open-weight models locally on a shared NVIDIA RTX A6000 (48\,GB), in 3.5--9\,GB slices. We keep responses cut off at the token limit and score them as they are. The truncation rate is 5.3\% for \qhalf, 2.2\% for \qone, and at most 1.6\% for the other models. Excluding truncated responses changes the E1 cross-model mean by at most 0.5\pp at any $k$, and any single model by at most 2.4\pp (\qhalf at $k=1$).
+
+\input{tables/models}
+
+\para{Statistics.} We compute 95\% confidence intervals with a cluster bootstrap over the 40 tasks ($B=2{,}000$). We test paired effects with a task-clustered sign-flip permutation test (10k permutations). Holm correction runs across the 8 models for E3 and E4, and across the 32 model-by-group cells for E2 group effects. For E1, we estimate a linear-probability slope with instruction fixed effects and a logistic GLM, \texttt{ok $\sim$ k + C(instruction)}, with task-clustered standard errors. The logistic model handles floor and ceiling effects. For H5, we compute Spearman correlations with $\log(\text{params})$.
+
+\para{Verifier audit.} We inspected samples of failures for each instruction and, while writing this paper, classified all failures with a second pass. This pass found one systematic false negative. The \ins{P_ahoy} check removes a title only when it sits on its own line, so ``\dbl{Title} Ahoy, matey!'' counts as a failure even though the response begins correctly after the title. Across the 18,232 main-experiment responses that carry \ins{P_ahoy}, a corrected check changes 518 scores (2.8\%): 509 become passes and 9 become failures. Of the 509, 302 come from \qthree and 168 from \lone. The other verifiers showed no such pattern. We report the original scores as our primary results, so that all tables match the original analysis, and we rerun the full analysis with the corrected check in \secref{sec:sensitivity}. Where a claim does not survive the correction, we say so.

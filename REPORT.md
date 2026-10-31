@@ -1,0 +1,336 @@
+# System Prompt Interference Patterns: How Multiple Instructions Compete and Cancel
+
+## 1. Executive Summary
+
+**Question.** When several verifiable instructions sit together in an LLM *system prompt*, how does compliance depend
+on (a) how many there are, (b) which categories are combined, (c) where an instruction is placed, and (d) whether it is
+repeated? And do smaller models degrade faster?
+
+**Answer.** We ran 8 open-weight chat models (0.5B–8B; Qwen2.5, Llama-3.x, Qwen3) on 5,120 controlled system-prompt
+configurations each (41k generations, plus 8k for a format-robustness check), and scored every response with
+deterministic IFEval-style checks. **Instruction count is the dominant factor.** Mean per-instruction compliance falls
+from 83% (1 instruction) to 70% (5) and 59% (10). The share of responses that satisfy *all* instructions falls much
+further, from 83% to 37% (5) and 5% (10). Even the best model (Qwen3-8B) satisfies all 10 only 24% of the time.
+**The other hypothesised effects are real but much smaller than predicted:**
+
+- Placing an instruction last instead of first: +1.7 pp overall (hypothesis: +15–25 pp).
+- Repeating an instruction: +3.3 pp for that instruction (hypothesis: +10–15 pp). The small cost to the other
+  instructions (−0.9 pp) comes from the longer prompt, not from the repetition: a neutral filler line costs the same.
+- Category interference: format and length instructions did not broadly suppress persona and style ones. The large
+  drops come from specific *shape-defining* format instructions. "Use exactly 3 bullets" makes models output only
+  bullets, and they drop the title, the closing phrase, the self-introduction and keywords.
+
+**Practical implications.**
+- Every added instruction lowers the chance of full compliance multiplicatively. Keep system prompts short, or check
+  outputs with code.
+- Don't rely on ordering or repetition tricks to fix compliance.
+- Watch for instructions that fix the whole layout of the response; they swallow the "wrapper" requirements.
+
+## 2. Research Question & Hypotheses
+
+Hypothesis as given, decomposed into tests:
+
+| ID | Claim | Experiment |
+|---|---|---|
+| H1 | Single-instruction compliance > 90% across models; 50–65% with ≥5 instructions | E1 load curve |
+| H2 | Format/length instructions reduce persona/style compliance by 20–30 pp when combined | E2 all pairs |
+| H3 | Instructions placed last are followed 15–25 pp more often than when placed first | E3 first vs last |
+| H4 | Repeating an instruction 2× raises its compliance 10–15 pp and lowers others' by 5–8 pp | E4 repetition |
+| H5 | Smaller models show steeper compliance decay curves | E1 across 8 models |
+
+**Why it matters / gap.** Multi-constraint instruction-following benchmarks (IFEval, Zhou et al. 2023; FollowBench,
+Jiang et al. 2024; ComplexBench, Wen et al. 2024; ManyIFEval / "how many instructions can LLMs follow at once",
+Harada et al. 2025) show that the all-satisfied rate falls as constraints are added. They mostly put constraints in
+the user turn and report aggregate scores. Position effects are known for long contexts (Lost in the Middle, Liu
+et al. 2024). This study instead uses a **controlled factorial design inside the system prompt** that separates count,
+pairwise interference, position (paired), and repetition (with a length-matched control) across model sizes.
+*Note:* the resource-finder stage was skipped for this workspace (no papers/, datasets/ or code/ were provided), so
+the literature context comes from background knowledge, not from downloaded papers.
+
+## 3. Experimental Setup
+
+### Instruction pool (`src/instructions.py`)
+There are 10 instructions in 4 categories. They are designed so that all 10 can be satisfied together; phrase checks
+ignore case so that "all lowercase" never conflicts with them.
+
+| id | group | instruction text (abridged) | verifier |
+|---|---|---|---|
+| F_title | format | title in `<<double angular brackets>>` | regex `<<…>>` |
+| F_bullets | format | exactly 3 markdown bullets starting with "* " | exactly 3 bullet lines (`*`, `-`, `•`) |
+| F_end | format | end with exact phrase "Any other questions?" | stripped text ends with phrase |
+| L_max | length | under 100 words | whitespace word count < 100 |
+| P_ahoy | persona | cheerful pirate; begin with "Ahoy" | first word (after an optional title line) is "ahoy" |
+| P_name | persona | introduce yourself as Captain Byte | contains "captain byte" |
+| P_matey | persona | address the user as "matey" | contains word "matey" |
+| S_lower | style | all lowercase | no uppercase characters |
+| S_nocomma | style | no commas | no "," |
+| S_keyword | style | use "remarkable" ≥ 2 times | count ≥ 2 |
+
+Each system prompt is `"You are a helpful assistant. Follow all of these instructions in every response:"` followed by
+one instruction per line. The user turn is one of **40 hand-written neutral requests** (e.g., "Explain why the sky is
+blue."), written fresh to avoid benchmark contamination.
+
+### Experiments (`src/build_prompts.py`, seed 42; 5,120 prompts per model)
+- **E1 Load curve (2,400 prompts).** k ∈ {1, 2, 3, 5, 7, 10}. For k = 1, every instruction is paired with every task.
+  For k > 1, there are 400 random subsets in random order.
+- **E2 Pairwise interference (720 prompts).** All 45 pairs × 2 orders × 8 tasks. Each response is compared with the
+  *same instruction on the same task alone* (from E1, k = 1), giving a paired difference.
+- **E3 Position (800 prompts).** For each of the 10 targets × 40 tasks, the target goes either first or last among 5
+  instructions. The other 4 instructions and their order are identical in both versions (paired design).
+- **E4 Repetition (1,200 prompts).** Base: 5 instructions with the target in a random slot. *Repeat*: a second copy of
+  the target is inserted in a random non-adjacent slot. *Filler*: the neutral line "Be accurate and helpful." goes in
+  the **same** slot instead. The filler condition separates repetition from simply making the prompt longer.
+- **Robustness (2,000 prompts per model).** E1 (k = 1, 5, 10) and E3 re-rendered as a **numbered list**. Run on
+  Qwen2.5-1.5B, Qwen2.5-3B, Llama-3.2-3B and Qwen3-8B.
+
+### Models (all real generations; no API keys were available on this host, so open-weight models were run locally)
+| key | checkpoint | params | how it was run |
+|---|---|---|---|
+| qwen2.5-0.5b / 1.5b / 3b / 7b | Qwen/Qwen2.5-{…}-Instruct-AWQ | 0.5–7.6B | vLLM 0.32, 4-bit AWQ |
+| llama3.2-1b | unsloth/Llama-3.2-1B-Instruct | 1.2B | vLLM, bf16 |
+| llama3.2-3b | AMead10/Llama-3.2-3B-Instruct-AWQ | 3.2B | vLLM, AWQ |
+| llama3.1-8b | hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4 | 8.0B | vLLM, AWQ |
+| qwen3-8b | Qwen/Qwen3-8B (thinking disabled) | 8.2B | host vLLM server (bf16), OpenAI-compatible API |
+
+Decoding was greedy (temperature 0), max_tokens 512, seed 42, using each model's chat template with a system role.
+Responses cut off at the token limit (`finish_reason = length`) are kept and scored as-is. The truncation rate was
+5.3% for Qwen-0.5B (mostly degenerate repetition), 2.2% for Qwen-1.5B and ≤1.6% for all other models.
+
+**Hardware:** NVIDIA RTX A6000 (48 GB), shared with other users. Models ran in 3.5–9 GB slices with an in-process
+vLLM worker (`src/worker.py`). Generation took ~3–6 min per small model and ~10–15 min for 7B/8B. Total: ~49k
+generations, with no API cost.
+
+### Statistics (`src/analyze.py`)
+- Compliance is binary per (response, instruction).
+- 95% CIs come from a **cluster bootstrap over the 40 user tasks** (B = 2,000).
+- Paired effects (E2, E3, E4) are tested with a task-clustered **sign-flip permutation test** (10k permutations),
+  with Holm correction across models within each hypothesis.
+- E1 slopes: a linear-probability slope with instruction fixed effects (pp per added instruction), and a **logistic
+  GLM** `ok ~ k + C(instruction)` with task-clustered standard errors (handles floor and ceiling).
+- H5 uses Spearman correlation with log(params).
+
+**Verifier audit:** samples of failures for every instruction were inspected manually
+(`results/analysis/error_examples.md`). Failures were genuine: missing phrases, inline pseudo-bullets, stray capitals,
+degenerate repetition. No systematic false negatives were found.
+
+## 4. Results
+
+### E1 / H1: compliance vs number of instructions
+
+![E1](figures/e1_load_curve.png)
+
+Per-instruction compliance (all-satisfied rate in parentheses), 95% CI half-width ≲ 3 pp:
+
+| model | k=1 | k=2 | k=3 | k=5 | k=7 | k=10 |
+|---|---|---|---|---|---|---|
+| qwen2.5-0.5b | 42.5 | 30.9 (7.5) | 21.3 (0.2) | 19.6 (0) | 17.5 (0) | 17.6 (0) |
+| llama3.2-1b | 88.2 | 88.5 (78.0) | 81.8 (55.0) | 72.3 (18.0) | 64.5 (1.5) | 53.8 (0) |
+| qwen2.5-1.5b | 60.0 | 46.2 (20.2) | 39.5 (4.5) | 33.2 (0) | 28.7 (0) | 30.4 (0) |
+| qwen2.5-3b | 83.2 | 81.6 (66.8) | 76.8 (43.2) | 73.4 (19.2) | 64.7 (2.2) | 56.6 (0) |
+| llama3.2-3b | 98.5 | 98.0 (96.0) | 95.0 (85.2) | 89.4 (58.0) | 82.7 (28.0) | 71.0 (2.5) |
+| qwen2.5-7b | 96.0 | 93.2 (86.8) | 89.0 (70.2) | 82.2 (37.5) | 76.2 (11.5) | 72.9 (2.8) |
+| llama3.1-8b | 99.5 | 99.5 (99.0) | 97.1 (91.5) | 94.4 (75.5) | 90.6 (51.2) | 82.2 (11.0) |
+| qwen3-8b | 99.2 | 99.4 (98.8) | 99.3 (98.0) | 97.6 (88.0) | 94.5 (66.2) | 88.5 (23.8) |
+| **mean** | 83.4 | 79.7 (69.1) | 75.0 (56.0) | 70.3 (37.0) | 64.9 (20.1) | 59.1 (5.0) |
+
+**H1 verdict: partially supported.**
+- Single-instruction compliance is > 90% for only 4 of 8 models: Llama-3.2-3B, Qwen2.5-7B, Llama-3.1-8B and Qwen3-8B.
+  The small Qwen2.5 models fail even single instructions often (0.5B: 43%; 1.5B: 60%).
+- At k ≥ 5, per-instruction compliance ranges from 18% to 93% depending on the model. The hypothesised 50–65% band
+  fits mid-size models (Llama-1B 61%, Qwen-3B 63% averaged over k ≥ 5) and the k = 10 cross-model mean (59%). It does
+  not fit the strong 8B models (88–93%) or the weak ones (18–31%).
+- The more practically relevant metric, *all instructions satisfied*, drops much more steeply: 37% at k = 5 and 5% at
+  k = 10.
+- Per-instruction compliance is not simply additive. Some instructions *improve* under load: S_nocomma rises when
+  bullets, a title or a word limit shorten the answer.
+
+### E2 / H2: which instructions interfere
+
+![E2 capable models](figures/e2_interference_matrix_capable.png)
+
+The heatmap shows the change in target A's compliance when paired with B, relative to A alone on the same task. It
+averages the 6 models whose single-instruction compliance is ≥ 80%; the version pooled over all models is in
+`figures/e2_interference_matrix.png`.
+
+Group-level deltas for persona/style (P/S) targets, by partner group (pp; * = Holm-adjusted p < .05):
+
+| model | P/S target + F/L partner | P/S target + P/S partner | contrast (FL − PS partner) [95% CI] |
+|---|---|---|---|
+| qwen2.5-0.5b | −21.6* | −16.9* | −4.7 [−9.1, −0.5] |
+| llama3.2-1b | −5.7 | +2.1 | −7.8 [−11.4, −4.1] |
+| qwen2.5-1.5b | −19.5* | −7.3 | −12.2 [−17.6, −7.2] |
+| qwen2.5-3b | −3.4 | −0.8 | −2.6 [−7.6, 2.9] |
+| llama3.2-3b | −0.3 | +0.2 | −0.5 [−2.4, 1.4] |
+| qwen2.5-7b | −6.2 | −1.5 | −4.8 [−8.3, −1.1] |
+| llama3.1-8b | +1.0 | +0.4 | +0.6 [−0.5, 2.1] |
+| qwen3-8b | 0.0 | +0.8 | −0.8 [−2.0, 0.2] |
+
+**H2 verdict: direction supported for some models, magnitude not supported in general.**
+- Persona/style instructions do suffer more from a format/length partner than from a persona/style partner in 4 of 8
+  models (CI excludes 0). The extra drop is 5–12 pp.
+- A 20–30 pp drop appears only in the two smallest Qwen models, and there persona/style partners also cause large drops.
+- For capable models, interference is **instruction-specific, not category-wide**. The largest cells (capable models;
+  "partner → target"):
+  - F_bullets → F_end: −30 pp
+  - F_bullets → S_keyword: −20
+  - S_nocomma → F_end: −15
+  - F_bullets → P_name: −12
+  - P_ahoy → P_name: −11
+  - F_title → P_ahoy: −12
+  - L_max → S_keyword: −12
+- The strongest single interference is *format-on-format* (bullets erase the closing phrase), which the hypothesis
+  does not anticipate. Qwen2.5-3B is the clearest case: format targets with a format partner drop 19 pp (p_holm < .001).
+- There is also **facilitation**: S_nocomma gains 5–11 pp next to almost any structural instruction. Short, bulleted or
+  word-limited answers contain fewer commas.
+
+Mechanism (from `results/analysis/error_examples.md`): with "exactly 3 bullets", models emit *only* the three bullets.
+They leave out the title, the self-introduction ("I'm Captain Byte"), and the closing "Any other questions?". The
+bullet instruction "captures" the whole response layout. Similarly, "begin with Ahoy" often produces "Ahoy! Ahoy
+there, matey!", which satisfies the opening but crowds out the self-introduction (P_name).
+
+### E3 / H3: first vs last position
+
+| model | target first | target last | Δ last − first [95% CI] | p (Holm) |
+|---|---|---|---|---|
+| qwen2.5-0.5b | 20.2 | 23.2 | +3.0 [0.7, 5.5] | .20 |
+| llama3.2-1b | 77.0 | 73.2 | −3.8 [−8.0, 0.8] | .50 |
+| qwen2.5-1.5b | 34.0 | 32.0 | −2.0 [−6.2, 2.0] | 1.0 |
+| qwen2.5-3b | 65.8 | 74.0 | **+8.2** [4.2, 12.5] | .005 |
+| llama3.2-3b | 89.2 | 88.0 | −1.2 [−4.2, 2.0] | 1.0 |
+| qwen2.5-7b | 80.8 | 84.0 | +3.2 [0.0, 6.5] | .45 |
+| llama3.1-8b | 94.5 | 95.0 | +0.5 [−1.2, 2.2] | 1.0 |
+| qwen3-8b | 93.0 | 98.2 | **+5.2** [3.0, 7.5] | <.001 |
+| **all** | 69.3 | 71.0 | **+1.7** [0.8, 2.7] | .002 |
+
+**H3 verdict: not supported in magnitude.**
+- There is a small recency advantage overall (+1.7 pp).
+- It is family-dependent: Qwen models show recency (Qwen2.5-3B +8, Qwen3-8B +5, i.e. 7% → 2% failures for Qwen3), while
+  Llama models show none or slight primacy.
+- No model reaches +15 pp.
+- The secondary analysis of E1's random orders agrees: compliance in the last third vs first third of the prompt is
+  +5.5 pp for Qwen3-8B, +4.9 for Qwen2.5-3B, and ≈ 0 or negative for Llama (`e1_position_thirds.csv`).
+- The numbered-list robustness run reproduces these signs: Qwen2.5-3B +7.0, Qwen3-8B +3.0, Llama-3.2-3B −3.0,
+  Qwen2.5-1.5B −3.8.
+
+![E3/E4](figures/e3_e4_position_repetition.png)
+
+### E4 / H4: repetition
+
+All values are pp, pooled over 8 models (3,200 paired items per condition); per-model results are in
+`results/analysis/e4_repetition.csv`.
+
+| measure | repeat − base | repeat − filler | filler − base |
+|---|---|---|---|
+| repeated (target) instruction | **+3.3** [2.2, 4.5] | +4.4 [3.2, 5.5] | −1.0 [−2.1, 0.0] |
+| other 4 instructions | −0.9 [−1.4, −0.3] | +0.1 [−0.5, 0.6] | −0.9 [−1.4, −0.5] |
+
+**H4 verdict: direction supported, magnitude not.**
+- Repetition helps the repeated instruction by +3.3 pp on average. The largest effects are in Qwen2.5-1.5B (+6.8) and
+  Qwen2.5-7B (+6.0); no model reaches +10 pp.
+- The other instructions lose −0.9 pp (vs the hypothesised 5–8). Adding a neutral filler line in the same slot causes
+  the same loss, so **the collateral cost comes from prompt length or dilution, not from the repetition itself**.
+- Qwen2.5-7B is the only model with a notable collateral cost (−2.9 pp vs base, but −0.6 vs filler).
+
+### H5: model size and decay steepness
+
+![H5](figures/h5_slope_vs_size.png)
+
+| model | params | slope (pp per added instr.) [95% CI] | relative drop k=1 → k≥5 | logit slope [95% CI] |
+|---|---|---|---|---|
+| qwen2.5-0.5b | 0.5 | −1.30 [−1.48, −1.14] | 57% | −0.18 [−0.21, −0.16] |
+| llama3.2-1b | 1.2 | −3.99 [−4.21, −3.75] | 30% | −0.24 [−0.26, −0.23] |
+| qwen2.5-1.5b | 1.5 | −1.80 [−2.15, −1.46] | 49% | −0.13 [−0.16, −0.11] |
+| qwen2.5-3b | 3.1 | −3.05 [−3.35, −2.76] | 24% | −0.18 [−0.20, −0.16] |
+| llama3.2-3b | 3.2 | −3.36 [−3.56, −3.14] | 20% | −0.35 [−0.37, −0.33] |
+| qwen2.5-7b | 7.6 | −2.38 [−2.62, −2.12] | 21% | −0.20 [−0.23, −0.18] |
+| llama3.1-8b | 8.0 | −2.15 [−2.40, −1.89] | 12% | −0.34 [−0.38, −0.30] |
+| qwen3-8b | 8.2 | −1.47 [−1.63, −1.30] | 7% | −0.44 [−0.49, −0.39] |
+
+Spearman ρ with log(params): absolute slope ρ = 0.07 (p = .87); relative drop ρ = −0.95 (p < .001); logit slope
+ρ = −0.64 (p = .09).
+
+**H5 verdict: depends on the scale used.**
+- *Relative to their own single-instruction baseline*, smaller models lose much more (Qwen-0.5B loses 57% of its
+  compliance; Qwen3-8B loses 7%). In that sense H5 holds.
+- In absolute pp per instruction there is no size trend: the curve is an inverted U. Floor models have little left to
+  lose, and ceiling models lose slowly at first.
+- On the odds (logit) scale, larger models decay *at least as steeply* (Qwen3-8B: odds × 0.65 per added instruction
+  vs × 0.83 for Qwen-0.5B). Larger models start from a much higher base, but each extra instruction removes a similar
+  or larger share of the odds of success.
+- Family matters as much as size: Llama models have steeper logit slopes than Qwen2.5 models of the same size.
+
+### Robustness: numbered-list format (`results/analysis/robustness_numbered.csv`)
+k = 1 / 5 / 10 compliance, plain vs numbered: Llama-3.2-3B 98.5/89.4/71.0 vs 98.5/89.0/71.1; Qwen2.5-3B
+83.2/73.4/56.6 vs 86.2/70.3/53.4; Qwen3-8B 99.2/97.6/88.5 vs 99.8/98.0/92.6. Load curves and position signs are
+essentially unchanged. Numbering slightly helps Qwen3-8B at k = 10 (+4 pp) and slightly hurts Qwen2.5-3B (−3 pp).
+
+## 5. Discussion
+
+- **Count dominates, and it compounds.** Per-instruction compliance declines roughly linearly (2–4 pp per added
+  instruction for capable models), so the probability of meeting *all* constraints collapses. This matches the
+  multi-constraint literature, now shown in a clean system-prompt setting. For practitioners: a 10-rule system prompt
+  is fully obeyed in ≤ 24% of responses even by the best model tested.
+- **Interference is local and mechanistic, not categorical.** The hypothesis framed interference as format/length vs
+  persona/style. The data point instead to *layout capture*: instructions that fix the overall shape of the response
+  (bullets, title, opening word) displace content that has to live outside that shape (closing phrases, introductions,
+  keywords). Some combinations help each other (no-comma with structure). Building an interaction matrix like E2
+  before deploying a prompt is cheap and catches these cases.
+- **Ordering and repetition are weak levers.** Recency effects exist in Qwen models but are a few pp. Repetition buys
+  ~3–7 pp, and its apparent cost to other instructions is just the cost of a longer prompt.
+- **Size helps compliance but not robustness to load.** Bigger models start near ceiling and stay high in absolute
+  terms. Their odds of compliance still shrink by a constant (or larger) factor per added instruction, so the
+  "smaller models decay more steeply" claim only holds on a relative-to-baseline scale.
+
+**Surprises.**
+1. Qwen2.5-0.5B and 1.5B often fail even single instructions, so "single > 90%" is far from universal.
+2. Some instructions improve under load (facilitation).
+3. Llama shows no recency benefit; at most slight primacy.
+4. The biggest single interference is within the format category (bullets vs closing phrase).
+
+## 6. Limitations
+
+- **Models:** open models ≤ 8B only (no API keys on this host). Frontier API models may sit at ceiling for small k, so
+  the interesting regime may need k > 10. Most local models are 4-bit AWQ; quantization could slightly change
+  compliance.
+- **Instruction pool:** 10 instructions with lexical, verifiable proxies for persona and style. Real persona or tone
+  instructions are fuzzier; our persona checks test markers ("Ahoy", "Captain Byte"), not overall voice. Category
+  effects (H2) are confounded with which specific instructions represent each category; with 3–4 instructions per
+  category, category-level claims are weak.
+- **Greedy decoding, single run per prompt:** variance comes from tasks and instruction subsets, not from sampling.
+  Earlier work on this host found vLLM greedy outputs can change slightly with batch composition. Effects of a few pp
+  for a single model should be read with that in mind.
+- **Truncation:** 512-token cap. Truncated outputs (≤ 1.6% except the smallest Qwen models) can fail F_end.
+- **Generation logistics:** part of the Qwen2.5-7B run was lost (an output file was moved while being written) and
+  regenerated in a later engine instance. The resumed portion used identical prompts and settings but different
+  batching.
+- The literature summary is from background knowledge, since no papers were pre-gathered for this workspace.
+
+## 7. Conclusions & Next Steps
+
+Instruction **count** is the main driver of system-prompt non-compliance. Per-instruction compliance drops by 2–4 pp
+per added instruction, and full compliance collapses (37% at 5 instructions, 5% at 10). Position (+1.7 pp for last)
+and repetition (+3.3 pp, with no specific cost to other instructions) are minor. Interference is concentrated in
+specific layout-capturing combinations rather than broad format-vs-persona competition. Smaller models are worse at
+every load level, but not less robust to added load once floor and ceiling effects are accounted for.
+
+**Follow-ups:**
+1. Repeat with frontier API models and k up to 20–30.
+2. Use LLM-judged persona and tone instructions to test category interference with richer instructions.
+3. Test mitigations aimed at layout capture (e.g., an explicit output template that combines the constraints).
+4. Use sampling at T > 0 with multiple seeds to separate decoding noise from small position and repetition effects.
+5. Test whether interference in E2 predicts failures at higher k (an additive pairwise model of E1).
+
+## References
+- Zhou et al. (2023). *Instruction-Following Evaluation for Large Language Models* (IFEval).
+- Jiang et al. (2024). *FollowBench: A Multi-level Fine-grained Constraints Following Benchmark for LLMs.*
+- Wen et al. (2024). *Benchmarking Complex Instruction-Following with Multiple Constraints Composition* (ComplexBench).
+- Harada et al. (2025). *Curse of Instructions / ManyIFEval: how many instructions can LLMs follow at once.*
+- Liu et al. (2024). *Lost in the Middle: How Language Models Use Long Contexts.* TACL.
+- Tools: vLLM 0.32, PyTorch 2.13, transformers 5.19, pandas 3.1, statsmodels 0.15, scipy 1.18, matplotlib 3.11.
+
+## Appendix: output locations
+- Prompts: `data/prompts.jsonl`, `data/prompts_numbered.jsonl` (full system/user text and design metadata)
+- Raw generations: `results/gens/<model>.jsonl` (text, finish reason, token counts)
+- Per-instruction scores: `results/scores.csv`
+- All analysis tables: `results/analysis/*.csv`, `results/analysis/summary.json`, `results/analysis/error_examples.md`
+- Figures: `figures/*.png`

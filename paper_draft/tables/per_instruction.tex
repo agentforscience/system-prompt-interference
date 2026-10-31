@@ -1,0 +1,15 @@
+\begin{table}[t]
+\centering
+\caption{E1 compliance (\%) by instruction, averaged over the six capable models. Name and bullet compliance fall steeply, while the word limit and no-comma rules barely move.}
+\label{tab:perinstruction}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lcccccccccc@{}}
+\toprule
+& \ins{F_title} & \ins{F_bullets} & \ins{F_end} & \ins{L_max} & \ins{P_ahoy} & \ins{P_name} & \ins{P_matey} & \ins{S_lower} & \ins{S_nocomma} & \ins{S_keyword} \\
+\midrule
+$k=1$ & 97.5 & 95.0 & 91.2 & 99.6 & 100.0 & 93.3 & 100.0 & 89.2 & 86.2 & 89.2 \\
+$k=5$ & 83.8 & 82.3 & 74.8 & 95.6 & 83.5 & 79.0 & 92.0 & 84.6 & 93.4 & 80.7 \\
+$k=10$ & 67.7 & 57.9 & 57.5 & 93.7 & 70.2 & 45.9 & 90.5 & 68.1 & 90.7 & 66.1 \\
+\bottomrule
+\end{tabular}}
+\end{table}

@@ -1,0 +1,8 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+We run a controlled study of verifiable instructions in system prompts across 8 open-weight models. Instruction count is the main driver of non-compliance: per-instruction compliance falls by about 1.5--4\pp per added instruction for capable models, and the all-satisfied rate falls to 37.0\% at five instructions and 5.0\% at ten. Placing an instruction last (+1.7\pp) and repeating it (+3.3\pp) help only a little, and repetition has no cost beyond prompt length. Interference concentrates in specific pairs, especially instructions that fix the whole response layout, rather than in broad format-versus-persona competition. Smaller models do worse at every load, but they are not clearly less robust to added load once floor and ceiling effects are considered.
+
+The key takeaway is simple: to improve compliance, remove instructions rather than rearrange them.
+
+Next, we plan to test frontier models with $k$ up to 20--30, use judged persona and tone instructions, test output templates as a mitigation for layout capture, sample at $T>0$ with multiple seeds to separate decoding noise from small effects, and test whether pairwise interference in E2 predicts failures at higher $k$.

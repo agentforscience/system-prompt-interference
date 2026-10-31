@@ -1,0 +1,17 @@
+\begin{table}[t]
+\centering
+\caption{Models. All use greedy decoding, a 512-token limit, and each model's chat template with a system role.}
+\label{tab:models}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llrl@{}}
+\toprule
+\textbf{Model} & \textbf{Checkpoint} & \textbf{Params (B)} & \textbf{Runtime} \\
+\midrule
+\qhalf, \qone, \qthree, \qseven & \texttt{Qwen/Qwen2.5-\{\ldots\}-Instruct-AWQ} & 0.5--7.6 & vLLM 0.32, 4-bit AWQ \\
+\lone & \texttt{unsloth/Llama-3.2-1B-Instruct} & 1.2 & vLLM, bf16 \\
+\lthree & \texttt{AMead10/Llama-3.2-3B-Instruct-AWQ} & 3.2 & vLLM, AWQ \\
+\leight & \texttt{hugging-quants/Meta-Llama-3.1-8B-Instruct-AWQ-INT4} & 8.0 & vLLM, AWQ \\
+\qeight & \texttt{Qwen/Qwen3-8B} (thinking disabled) & 8.2 & vLLM server, bf16 \\
+\bottomrule
+\end{tabular}}
+\end{table}

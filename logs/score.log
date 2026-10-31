@@ -1,0 +1,26 @@
+qwen2.5-0.5b   gens= 5120 truncated= 270
+qwen2.5-1.5b   gens= 5120 truncated= 111
+qwen2.5-3b     gens= 5120 truncated=  34
+qwen2.5-7b     gens= 5120 truncated=  18
+llama3.2-1b    gens= 5120 truncated=  84
+llama3.2-3b    gens= 5120 truncated=   7
+llama3.1-8b    gens= 5120 truncated=  32
+qwen3-8b       gens= 5120 truncated=   4
+qwen2.5-1.5b#num gens= 2000 truncated=  44
+qwen2.5-3b#num gens= 2000 truncated=  11
+llama3.2-3b#num gens= 2000 truncated=   4
+qwen3-8b#num   gens= 2000 truncated=   2
+exp                  E1     E2     E3     E4
+model                                       
+llama3.1-8b       0.899  0.992  0.943  0.942
+llama3.2-1b       0.665  0.874  0.724  0.719
+llama3.2-3b       0.827  0.963  0.890  0.894
+llama3.2-3b#num   0.784    NaN  0.893    NaN
+qwen2.5-0.5b      0.202  0.283  0.204  0.197
+qwen2.5-1.5b      0.336  0.458  0.332  0.323
+qwen2.5-1.5b#num  0.328    NaN  0.317    NaN
+qwen2.5-3b        0.665  0.803  0.699  0.704
+qwen2.5-3b#num    0.607    NaN  0.684    NaN
+qwen2.5-7b        0.794  0.935  0.824  0.818
+qwen3-8b          0.939  0.997  0.971  0.971
+qwen3-8b#num      0.947    NaN  0.979    NaN

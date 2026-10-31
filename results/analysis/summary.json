@@ -1,0 +1,46 @@
+{
+  "models": [
+    "qwen2.5-0.5b",
+    "llama3.2-1b",
+    "qwen2.5-1.5b",
+    "qwen2.5-3b",
+    "llama3.2-3b",
+    "qwen2.5-7b",
+    "llama3.1-8b",
+    "qwen3-8b"
+  ],
+  "n_rows": 181120,
+  "H5_spearman_logparams_vs_slope": {
+    "rho": 0.07142857142857144,
+    "p": 0.8665262706759088,
+    "n": 8
+  },
+  "H5_spearman_logparams_vs_reldrop": {
+    "rho": -0.9523809523809524,
+    "p": 0.000260400024387251,
+    "n": 8
+  },
+  "H5_spearman_logparams_vs_logit_slope": {
+    "rho": -0.6428571428571429,
+    "p": 0.08555889101267325,
+    "n": 8
+  },
+  "capable_models": [
+    "llama3.2-1b",
+    "qwen2.5-3b",
+    "llama3.2-3b",
+    "qwen2.5-7b",
+    "llama3.1-8b",
+    "qwen3-8b"
+  ],
+  "truncation_rate": {
+    "llama3.1-8b": 0.00625,
+    "llama3.2-1b": 0.01640625,
+    "llama3.2-3b": 0.0013671875,
+    "qwen2.5-0.5b": 0.052734375,
+    "qwen2.5-1.5b": 0.0216796875,
+    "qwen2.5-3b": 0.006640625,
+    "qwen2.5-7b": 0.003515625,
+    "qwen3-8b": 0.00078125
+  }
+}

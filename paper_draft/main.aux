@@ -1,0 +1,83 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldcontentsline\contentsline
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\bibstyle{plainnat}
+\citation{zhou2023ifeval}
+\citation{jiang2024followbench}
+\citation{wen2024complexbench}
+\citation{harada2025multiply}
+\citation{liu2024lost}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{1}{1}{Introduction}{section.1}{}}
+\citation{zhou2023ifeval}
+\citation{jiang2024followbench}
+\citation{wen2024complexbench}
+\citation{harada2025multiply}
+\citation{liu2024lost}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Study design. Each model receives the same 5,120 system-prompt configurations. Each experiment varies one factor, and every response is scored against each instruction in its prompt.}}{2}{figure.1}\protected@file@percent }
+\newlabel{fig:method}{{1}{2}{Study design. Each model receives the same 5,120 system-prompt configurations. Each experiment varies one factor, and every response is scored against each instruction in its prompt}{figure.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{section.2}\protected@file@percent }
+\newlabel{sec:related}{{2}{2}{Related Work}{section.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces The instruction pool. Phrase checks ignore case, so \texttt  {S_lower} never conflicts with them. All 10 instructions can be satisfied together.}}{3}{table.1}\protected@file@percent }
+\newlabel{tab:instructions}{{1}{3}{The instruction pool. Phrase checks ignore case, so \ins {S_lower} never conflicts with them. All 10 instructions can be satisfied together}{table.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Models. All use greedy decoding, a 512-token limit, and each model's chat template with a system role.}}{3}{table.2}\protected@file@percent }
+\newlabel{tab:models}{{2}{3}{Models. All use greedy decoding, a 512-token limit, and each model's chat template with a system role}{table.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Methodology}{3}{section.3}\protected@file@percent }
+\newlabel{sec:method}{{3}{3}{Methodology}{section.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Compliance against instruction count. {\em  (Left)}Per-instruction compliance declines roughly linearly for most models, with a floor near 18\% for \textsc  {Qwen2.5-0.5B}\xspace  . {\em  (Right)}The all-satisfied rate collapses, and no model exceeds 24\% at $k=10$. Shaded band: the hypothesized 50--65\% range at $k \geq 5$. Error bars: 95\% CIs.}}{4}{figure.2}\protected@file@percent }
+\newlabel{fig:e1}{{2}{4}{Compliance against instruction count. \figleft Per-instruction compliance declines roughly linearly for most models, with a floor near 18\% for \qhalf . \figright The all-satisfied rate collapses, and no model exceeds 24\% at $k=10$. Shaded band: the hypothesized 50--65\% range at $k \geq 5$. Error bars: 95\% CIs}{figure.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Results}{4}{section.4}\protected@file@percent }
+\newlabel{sec:results}{{4}{4}{Results}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Instruction count (E1, H1)}{4}{subsection.4.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces E1: per-instruction compliance (\%), with all-satisfied rate in parentheses. Bootstrap 95\% CI half-widths are about 3\,pp\xspace  or less. Best result per column in \textbf  {bold}.}}{5}{table.3}\protected@file@percent }
+\newlabel{tab:e1}{{3}{5}{E1: per-instruction compliance (\%), with all-satisfied rate in parentheses. Bootstrap 95\% CI half-widths are about 3\pp or less. Best result per column in \textbf {bold}}{table.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces E1 compliance (\%) by instruction, averaged over the six capable models. Name and bullet compliance fall steeply, while the word limit and no-comma rules barely move.}}{5}{table.4}\protected@file@percent }
+\newlabel{tab:perinstruction}{{4}{5}{E1 compliance (\%) by instruction, averaged over the six capable models. Name and bullet compliance fall steeply, while the word limit and no-comma rules barely move}{table.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Pairwise interference (E2, H2)}{5}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Position (E3, H3)}{5}{subsection.4.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces E2: change in persona/style (P/S) compliance relative to the same instruction alone, by partner group (pp). * marks Holm-adjusted $p<.05$. The contrast is the extra drop from a format/length (F/L) partner; \textbf  {bold} contrasts have a 95\% CI that excludes 0.}}{6}{table.5}\protected@file@percent }
+\newlabel{tab:e2}{{5}{6}{E2: change in persona/style (P/S) compliance relative to the same instruction alone, by partner group (pp). * marks Holm-adjusted $p<.05$. The contrast is the extra drop from a format/length (F/L) partner; \textbf {bold} contrasts have a 95\% CI that excludes 0}{table.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Change in target A's compliance when paired with partner B, relative to A alone on the same task (pp), averaged over the six capable models. Each model contributes 16 responses per cell. Large drops sit in a few cells, mainly the \texttt  {F_bullets} column. The \texttt  {S_nocomma} row shows facilitation. The \texttt  {F_title}/\texttt  {P_ahoy} cell is inflated by the verifier issue in section\nobreakspace  {}\ref  {sec:sensitivity}.}}{6}{figure.3}\protected@file@percent }
+\newlabel{fig:e2}{{3}{6}{Change in target A's compliance when paired with partner B, relative to A alone on the same task (pp), averaged over the six capable models. Each model contributes 16 responses per cell. Large drops sit in a few cells, mainly the \ins {F_bullets} column. The \ins {S_nocomma} row shows facilitation. The \ins {F_title}/\ins {P_ahoy} cell is inflated by the verifier issue in \secref {sec:sensitivity}}{figure.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Repetition (E4, H4)}{6}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Model size (H5)}{6}{subsection.4.5}\protected@file@percent }
+\citation{harada2025multiply}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces E3: target compliance (\%) by position among 5 instructions. $p$ values are Holm-adjusted across models; the pooled row is unadjusted. \textbf  {Bold} marks $p<.05$.}}{7}{table.6}\protected@file@percent }
+\newlabel{tab:e3}{{6}{7}{E3: target compliance (\%) by position among 5 instructions. $p$ values are Holm-adjusted across models; the pooled row is unadjusted. \textbf {Bold} marks $p<.05$}{table.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces E4: repetition effects in pp [95\% CI], pooled over 8 models (3,200 paired items per condition).}}{7}{table.7}\protected@file@percent }
+\newlabel{tab:e4}{{7}{7}{E4: repetition effects in pp [95\% CI], pooled over 8 models (3,200 paired items per condition)}{table.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Robustness: numbered lists}{7}{subsection.4.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}Verifier sensitivity}{7}{subsection.4.7}\protected@file@percent }
+\newlabel{sec:sensitivity}{{4.7}{7}{Verifier sensitivity}{subsection.4.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Discussion}{7}{section.5}\protected@file@percent }
+\newlabel{sec:discussion}{{5}{7}{Discussion}{section.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces {\em  (Left)}E3: target compliance when placed first or last. {\em  (Center)}E4: compliance of the repeated instruction under base, filler, and repeat conditions. {\em  (Right)}E4: compliance of the other 4 instructions. Differences between conditions are small compared with differences between models.}}{8}{figure.4}\protected@file@percent }
+\newlabel{fig:e3e4}{{4}{8}{\figleft E3: target compliance when placed first or last. \figcenter E4: compliance of the repeated instruction under base, filler, and repeat conditions. \figright E4: compliance of the other 4 instructions. Differences between conditions are small compared with differences between models}{figure.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces H5: decay by model size. The slope is pp per added instruction, the relative drop compares $k=1$ with $k \geq 5$, and the logit slope comes from the logistic GLM (95\% CIs in brackets). Models are sorted by size. Shallowest slope and smallest drop in \textbf  {bold}.}}{8}{table.8}\protected@file@percent }
+\newlabel{tab:h5}{{8}{8}{H5: decay by model size. The slope is pp per added instruction, the relative drop compares $k=1$ with $k \geq 5$, and the logit slope comes from the logistic GLM (95\% CIs in brackets). Models are sorted by size. Shallowest slope and smallest drop in \textbf {bold}}{table.8}{}}
+\bibdata{references}
+\bibcite{harada2025multiply}{{1}{2025}{{Harada et~al.}}{{Harada, Yamazaki, Taniguchi, Marrese-Taylor, Kojima, Iwasawa, and Matsuo}}}
+\bibcite{jiang2024followbench}{{2}{2024}{{Jiang et~al.}}{{Jiang, Wang, Zeng, Zhong, Li, Mi, Shang, Jiang, Liu, and Wang}}}
+\bibcite{liu2024lost}{{3}{2024}{{Liu et~al.}}{{Liu, Lin, Hewitt, Paranjape, Bevilacqua, Petroni, and Liang}}}
+\bibcite{wen2024complexbench}{{4}{2024}{{Wen et~al.}}{{Wen, Ke, Gu, Wu, Huang, Zhou, Li, Hu, Gao, Xu, Liu, Tang, Wang, and Huang}}}
+\bibcite{zhou2023ifeval}{{5}{2023}{{Zhou et~al.}}{{Zhou, Lu, Mishra, Brahma, Basu, Luan, Zhou, and Hou}}}
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Effect of the corrected \texttt  {P_ahoy} verifier on the results that change most. Other pooled results move by less than 1\,pp\xspace  . Across E1, the largest single-model shifts are 1.7\,pp\xspace  in compliance and 4.3\,pp\xspace  in the all-satisfied rate, both at $k=5$ and in the models listed here.}}{9}{table.9}\protected@file@percent }
+\newlabel{tab:sensitivity}{{9}{9}{Effect of the corrected \ins {P_ahoy} verifier on the results that change most. Other pooled results move by less than 1\pp . Across E1, the largest single-model shifts are 1.7\pp in compliance and 4.3\pp in the all-satisfied rate, both at $k=5$ and in the models listed here}{table.9}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion}{9}{section.6}\protected@file@percent }
+\newlabel{sec:conclusion}{{6}{9}{Conclusion}{section.6}{}}
+\gdef \@abspage@last{9}

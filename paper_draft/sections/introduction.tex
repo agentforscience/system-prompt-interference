@@ -1,0 +1,48 @@
+\section{Introduction}
+\label{sec:intro}
+
+A system prompt is often a list of rules: adopt this persona, use this format, stay under this length, close with this sentence, never use that punctuation. Each rule looks harmless on its own. Our main question is what happens when they sit together.
+
+This question matters because system prompts are where developers encode product behavior, and a rule that the model ignores is a silent failure. Developers need to know which rules crowd each other out, whether order matters, and whether saying something twice is a free improvement. Common advice covers all three, but it rarely comes with measurements.
+
+Existing work establishes that adding constraints hurts. Benchmarks such as \ifeval \citep{zhou2023ifeval}, \followbench \citep{jiang2024followbench}, \complexbench \citep{wen2024complexbench}, and \manyifeval \citep{harada2025multiply} show that models fail more often as requests grow more constrained. However, these benchmarks mostly place constraints in the user turn and report aggregate scores. They do not separate the factors a prompt author controls. Position effects are known for long contexts \citep{liu2024lost}, but a short list of rules in a system prompt is a different setting.
+
+We address this gap with a controlled factorial study inside the system prompt (see \figref{fig:method}). We build a pool of 10 verifiable instructions that can all be satisfied together, and we run four experiments that isolate count, pairwise interference, position, and repetition. We test five hypotheses: (H1) compliance exceeds 90\% for a single instruction and falls to 50--65\% with five or more; (H2) format and length instructions reduce persona and style compliance by 20--30\pp; (H3) instructions placed last beat instructions placed first by 15--25\pp; (H4) repetition raises an instruction's compliance by 10--15\pp and lowers the others by 5--8\pp; and (H5) smaller models decay faster.
+
+Count is the dominant factor, and most other effects are far smaller than hypothesized. Mean per-instruction compliance falls from 83.4\% at one instruction to 59.1\% at ten, and the all-satisfied rate falls to 5.0\%. Placing an instruction last adds 1.7\pp, and repeating it adds 3.3\pp. Interference comes from specific pairs rather than from whole categories: across capable models, adding the bullet instruction lowers compliance with a closing phrase by 30\pp on average.
+
+\begin{itemize}[leftmargin=*,itemsep=0pt,topsep=0pt]
+    \item We conduct a factorial study of system-prompt compliance across 8 open-weight models and about 41k generations, with a further 8k generations for a format robustness check.
+    \item We estimate a full $10 \times 10$ pairwise interference matrix and show that the large effects are specific pairs, led by format-on-format interference that a category-level view does not predict.
+    \item We separate repetition from prompt lengthening with a same-slot filler control, and show that the cost of repetition to other instructions matches the cost of a neutral line.
+    \item We show that the answer to ``do smaller models decay faster?'' depends on the scale, and we report a verifier audit with its effect on every headline result.
+\end{itemize}
+
+\Secref{sec:related} reviews related work, \secref{sec:method} describes our design, \secref{sec:results} presents results, \secref{sec:discussion} discusses implications and limitations, and \secref{sec:conclusion} concludes.
+
+\begin{figure}[t]
+\centering
+\resizebox{0.95\linewidth}{!}{%
+\begin{tikzpicture}[
+  node distance=5mm and 7mm,
+  box/.style={draw, rounded corners=2pt, align=center, font=\small, minimum height=11mm, inner sep=4pt, fill=black!4},
+  exp/.style={draw, rounded corners=2pt, align=left, font=\footnotesize, text width=52mm, inner sep=3pt, fill=aigreen},
+  arr/.style={-{Latex[length=2mm]}, thick}]
+\node[box, text width=25mm] (pool) {10 instructions\\(format, length,\\persona, style)\\+ 40 neutral tasks};
+\node[exp, right=of pool, yshift=12mm] (e1) {{\bf E1 Load:} $k \in \{1,2,3,5,7,10\}$};
+\node[exp, below=1.2mm of e1] (e2) {{\bf E2 Pairs:} 45 pairs $\times$ 2 orders};
+\node[exp, below=1.2mm of e2] (e3) {{\bf E3 Position:} target first vs.\ last};
+\node[exp, below=1.2mm of e3] (e4) {{\bf E4 Repetition:} base, repeat, filler};
+\node[box, right=of e2, yshift=-3mm, text width=22mm] (models) {8 open-weight models, greedy decoding};
+\node[box, right=of models, text width=22mm] (score) {Deterministic verifiers, paired statistics};
+\draw[arr] (pool.east) -- ++(3.5mm,0) |- (e1.west);
+\draw[arr] (pool.east) -- ++(3.5mm,0) |- (e2.west);
+\draw[arr] (pool.east) -- ++(3.5mm,0) |- (e3.west);
+\draw[arr] (pool.east) -- ++(3.5mm,0) |- (e4.west);
+\draw[arr] (e1.east) -- ++(3.5mm,0) |- (models.west);
+\draw[arr] (e4.east) -- ++(3.5mm,0) |- (models.west);
+\draw[arr] (models) -- (score);
+\end{tikzpicture}}
+\caption{Study design. Each model receives the same 5,120 system-prompt configurations. Each experiment varies one factor, and every response is scored against each instruction in its prompt.}
+\label{fig:method}
+\end{figure}

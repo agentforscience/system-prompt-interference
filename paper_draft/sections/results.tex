@@ -1,0 +1,79 @@
+\section{Results}
+\label{sec:results}
+
+We present results by hypothesis, then a format robustness check and a verifier sensitivity analysis.
+
+\subsection{Instruction count (E1, H1)}
+
+\para{{\bf How fast does compliance fall?}} \Figref{fig:e1} and \tabref{tab:e1} show that count has a strong effect at every model size. Mean per-instruction compliance falls from 83.4\% at $k=1$ to 70.3\% at $k=5$ and 59.1\% at $k=10$. The all-satisfied rate falls much further, to 37.0\% and 5.0\%. The best model, \qeight, satisfies all ten instructions in only 23.8\% of responses.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth]{figures/e1_load_curve.png}
+\caption{Compliance against instruction count. \figleft Per-instruction compliance declines roughly linearly for most models, with a floor near 18\% for \qhalf. \figright The all-satisfied rate collapses, and no model exceeds 24\% at $k=10$. Shaded band: the hypothesized 50--65\% range at $k \geq 5$. Error bars: 95\% CIs.}
+\label{fig:e1}
+\end{figure}
+
+\para{H1 is partially supported.} Single-instruction compliance exceeds 90\% for only 4 of 8 models. The small Qwen2.5 models often fail even one instruction (\qhalf 42.5\%, \qone 60.0\%). With $k \geq 5$, per-instruction compliance ranges from 18\% to 92\% depending on the model. The hypothesized 50--65\% band fits the mid-size models (\lone 61\%, \qthree 63\%) and the $k=10$ cross-model mean, but it does not fit the strongest models (88--92\%) or the weakest (18--30\%).
+
+\para{Load does not hit all instructions equally.} \Tabref{tab:perinstruction} shows that among capable models, \ins{P_name} falls by 47\pp from $k=1$ to $k=10$, while \ins{L_max} falls by 6\pp. \ins{S_nocomma} even rises slightly, from 86.2\% to 90.7\%, because bullets, titles, and word limits shorten answers.
+
+\input{tables/e1}
+\input{tables/per_instruction}
+
+\subsection{Pairwise interference (E2, H2)}
+
+\para{{\bf Do format and length rules suppress persona and style rules?}} \Tabref{tab:e2} shows that the direction holds for some models, but the hypothesized size does not hold in general. Persona and style instructions lose more next to a format or length partner than next to a persona or style partner in 4 of 8 models, with an extra drop of 5--12\pp. Drops of about 20\pp appear only in the two smallest Qwen models, and in those models persona and style partners also cause drops (\qhalf $-$16.9\pp). \lthree, \leight, and \qeight show no effect.
+
+\input{tables/e2}
+
+\para{Interference is specific, not categorical.} \Figref{fig:e2} shows the full matrix for the six models with single-instruction compliance of at least 80\%. Large cells include \partnerarrow{F_bullets}{F_end} ($-$30\pp), \partnerarrow{F_bullets}{S_keyword} ($-$20\pp), \partnerarrow{S_nocomma}{F_end} ($-$15\pp), \partnerarrow{F_bullets}{P_name}, \partnerarrow{L_max}{S_keyword}, and \partnerarrow{P_matey}{P_name} (each $-$12\pp), and \partnerarrow{P_ahoy}{P_name} ($-$11\pp). The strongest effect is format on format, which H2 does not anticipate. \qthree shows it most clearly: format and length targets with a format or length partner drop 19\pp (Holm-adjusted $p<.001$). The \partnerarrow{F_title}{P_ahoy} cell, which appears as $-$12\pp in \figref{fig:e2}, is mostly a verifier artifact (\secref{sec:sensitivity}).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.62\linewidth]{figures/e2_interference_matrix_capable.png}
+\caption{Change in target A's compliance when paired with partner B, relative to A alone on the same task (pp), averaged over the six capable models. Each model contributes 16 responses per cell. Large drops sit in a few cells, mainly the \ins{F_bullets} column. The \ins{S_nocomma} row shows facilitation. The \ins{F_title}/\ins{P_ahoy} cell is inflated by the verifier issue in \secref{sec:sensitivity}.}
+\label{fig:e2}
+\end{figure}
+
+\para{Large cells vary by model.} These means hide strong differences. \partnerarrow{F_bullets}{F_end} ranges from $-$69\pp for \lthree to 0\pp for \qeight. \partnerarrow{S_nocomma}{F_end} comes entirely from two Llama models (\lthree $-$69\pp, \lone $-$19\pp), and the other four models show 0\pp. \partnerarrow{P_ahoy}{P_name} comes mainly from \qthree ($-$56\pp). With 16 responses per model and cell, these per-model values are noisy.
+
+\para{{\bf Why do these pairs interfere?}} Failure inspection points to \emph{layout capture}. With ``exactly 3 bullets'', models tend to output only the bullets and drop whatever must live outside them. In the \partnerarrow{F_bullets}{F_end} cell, none of the 40 failures among the 96 capable-model responses contains the closing phrase at all. Similarly, a response that opens with ``Ahoy! Ahoy there, matey!'' satisfies the opening but can crowd out the self-introduction.
+
+\para{Some pairs help.} \ins{S_nocomma} gains 5--11\pp next to \ins{F_title}, \ins{F_bullets}, \ins{F_end}, and \ins{L_max}, because structured or shorter answers contain fewer commas.
+
+\subsection{Position (E3, H3)}
+
+\para{{\bf Does the last instruction win?}} H3 is not supported in magnitude. \Tabref{tab:e3} shows a small overall recency advantage of +1.7\pp [0.8, 2.7], and no model reaches the hypothesized +15\pp. Only two models show a Holm-significant effect: \qthree (+8.2\pp) and \qeight (+5.2\pp, failures fall from 7\% to 2\%). Llama models show no recency benefit. The random orders in E1 agree: last-third minus first-third compliance is +5.5\pp for \qeight and +4.9\pp for \qthree, and it ranges from $-$3.1\pp to +1.3\pp for Llama models.
+
+\input{tables/e3}
+
+\subsection{Repetition (E4, H4)}
+
+\para{{\bf Is repetition a free improvement?}} H4 holds in direction but not in magnitude. \Tabref{tab:e4} shows that repeating an instruction raises its compliance by +3.3\pp. The largest gains are in \qone (+6.8\pp) and \qseven (+6.0\pp), and no model reaches +10\pp. The other instructions lose 0.9\pp, far below the hypothesized 5--8\pp. A neutral filler line in the same slot causes the same loss, and repeat and filler do not differ for the other instructions (+0.1\pp [$-$0.5, 0.6]). So the collateral cost comes from a longer prompt, not from repetition. \Figref{fig:e3e4} shows per-model results.
+
+\input{tables/e4}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth]{figures/e3_e4_position_repetition.png}
+\caption{\figleft E3: target compliance when placed first or last. \figcenter E4: compliance of the repeated instruction under base, filler, and repeat conditions. \figright E4: compliance of the other 4 instructions. Differences between conditions are small compared with differences between models.}
+\label{fig:e3e4}
+\end{figure}
+
+\subsection{Model size (H5)}
+
+\para{{\bf Do smaller models decay faster?}} The answer depends on the scale (\tabref{tab:h5}). Relative to their own baseline, smaller models lose much more: \qhalf loses 57\% of its compliance, while \qeight loses 7\% (Spearman $\rho=-0.95$, $p<.001$). In absolute pp per added instruction there is no size trend ($\rho=0.07$, $p=.87$), because floor models have little left to lose and ceiling models lose slowly at first. On the logit scale, the trend points the other way, but it is not significant across 8 models ($\rho=-0.64$, $p=.09$): \qeight multiplies its odds by 0.65 per added instruction, and \qhalf by 0.83. Family matters too, since Llama models have steeper logit slopes than Qwen2.5 models of similar size.
+
+\input{tables/h5}
+
+\subsection{Robustness: numbered lists}
+
+We rerun E1 and E3 with numbered instructions on four models. Load curves barely change. Compliance at $k=1/5/10$ moves from 98.5/89.4/71.0 to 98.5/89.0/71.1 for \lthree, from 83.2/73.4/56.6 to 86.2/70.3/53.4 for \qthree, and from 99.2/97.6/88.5 to 99.8/98.0/92.6 for \qeight. Numbering helps \qeight by 4\pp at $k=10$ and hurts \qthree by 3\pp. Position signs are unchanged: \qthree +7.0\pp, \qeight +3.0\pp, \lthree $-$3.0\pp, and \qone $-$3.8\pp.
+
+\subsection{Verifier sensitivity}
+\label{sec:sensitivity}
+
+\Tabref{tab:sensitivity} reports the full analysis rerun with the corrected \ins{P_ahoy} check from \secref{sec:method}. Our main conclusions hold: count stays dominant, position and repetition stay small, and the Spearman results for H5 are unchanged to the reported precision. The same four models keep a contrast that excludes 0 in \tabref{tab:e2}. Two details change. First, the \partnerarrow{F_title}{P_ahoy} interference is mostly an artifact: it shrinks from $-$12.5\pp to $-$3.1\pp, and \qthree rises from 50\% to 100\% in this cell, so we do not count it as evidence of layout capture. Second, the \qthree recency effect shrinks to +6.5\pp, although it stays significant.
+
+\input{tables/sensitivity}

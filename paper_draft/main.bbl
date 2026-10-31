@@ -1,0 +1,53 @@
+\begin{thebibliography}{5}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Harada et~al.(2025)Harada, Yamazaki, Taniguchi, Marrese-Taylor,
+  Kojima, Iwasawa, and Matsuo]{harada2025multiply}
+Keno Harada, Yudai Yamazaki, Masachika Taniguchi, Edison Marrese-Taylor,
+  Takeshi Kojima, Yusuke Iwasawa, and Yutaka Matsuo.
+\newblock When instructions multiply: Measuring and estimating {LLM}
+  capabilities of multiple instructions following.
+\newblock In \emph{Findings of the Association for Computational Linguistics:
+  EMNLP 2025}, 2025.
+\newblock arXiv:2509.21051.
+
+\bibitem[Jiang et~al.(2024)Jiang, Wang, Zeng, Zhong, Li, Mi, Shang, Jiang, Liu,
+  and Wang]{jiang2024followbench}
+Yuxin Jiang, Yufei Wang, Xingshan Zeng, Wanjun Zhong, Liangyou Li, Fei Mi,
+  Lifeng Shang, Xin Jiang, Qun Liu, and Wei Wang.
+\newblock {FollowBench}: A multi-level fine-grained constraints following
+  benchmark for large language models.
+\newblock In \emph{Proceedings of the 62nd Annual Meeting of the Association
+  for Computational Linguistics}, 2024.
+\newblock \doi{10.18653/v1/2024.acl-long.257}.
+
+\bibitem[Liu et~al.(2024)Liu, Lin, Hewitt, Paranjape, Bevilacqua, Petroni, and
+  Liang]{liu2024lost}
+Nelson~F. Liu, Kevin Lin, John Hewitt, Ashwin Paranjape, Michele Bevilacqua,
+  Fabio Petroni, and Percy Liang.
+\newblock Lost in the middle: How language models use long contexts.
+\newblock \emph{Transactions of the Association for Computational Linguistics},
+  2024.
+\newblock \doi{10.1162/tacl_a_00638}.
+
+\bibitem[Wen et~al.(2024)Wen, Ke, Gu, Wu, Huang, Zhou, Li, Hu, Gao, Xu, Liu,
+  Tang, Wang, and Huang]{wen2024complexbench}
+Bosi Wen, Pei Ke, Xiaotao Gu, Lindong Wu, Hao Huang, Jinfeng Zhou, Wenchuang
+  Li, Binxin Hu, Wendy Gao, Jiaxin Xu, Yiming Liu, Jie Tang, Hongning Wang, and
+  Minlie Huang.
+\newblock Benchmarking complex instruction-following with multiple constraints
+  composition.
+\newblock arXiv:2407.03978, 2024.
+
+\bibitem[Zhou et~al.(2023)Zhou, Lu, Mishra, Brahma, Basu, Luan, Zhou, and
+  Hou]{zhou2023ifeval}
+Jeffrey Zhou, Tianjian Lu, Swaroop Mishra, Siddhartha Brahma, Sujoy Basu,
+  Yi~Luan, Denny Zhou, and Le~Hou.
+\newblock Instruction-following evaluation for large language models.
+\newblock arXiv:2311.07911, 2023.
+
+\end{thebibliography}

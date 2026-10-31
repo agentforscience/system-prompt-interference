@@ -1,0 +1,10 @@
+\section{Related Work}
+\label{sec:related}
+
+\para{Verifiable instruction following.} \citet{zhou2023ifeval} introduce \ifeval, which checks instructions such as word limits and required keywords with code rather than human judgment. We adopt this approach because deterministic checks let us score about 49k responses without a judge model. Unlike \ifeval, we place all instructions in the system prompt and design the pool so that any subset can be satisfied together.
+
+\para{Multi-constraint benchmarks.} \followbench \citep{jiang2024followbench} and \complexbench \citep{wen2024complexbench} study prompts with several or composed constraints. \manyifeval \citep{harada2025multiply} extends \ifeval to ten instructions per prompt, requires all of them to pass, and finds that performance degrades as instructions are added. Building on these results, we keep their prompt-level success metric but add per-instruction analysis, so that we can ask which instruction fails and next to which partner. Unlike these benchmarks, we vary one factor at a time inside the system prompt.
+
+\para{Position effects.} \citet{liu2024lost} show that language models use information at the beginning and end of long contexts better than information in the middle. Their setting is retrieval from long documents. We ask whether a similar advantage appears in a short rule list, using a paired design that holds the other instructions and their order fixed.
+
+\para{Our position.} We know of no comparison in the works above that separates count, pairwise interference, position, and repetition with a length-matched control in one design across model sizes. This survey is limited: no literature search stage ran for this project, so it rests on the works cited here rather than on a systematic review.

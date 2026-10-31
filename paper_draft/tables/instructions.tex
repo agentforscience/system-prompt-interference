@@ -1,0 +1,24 @@
+\begin{table}[t]
+\centering
+\caption{The instruction pool. Phrase checks ignore case, so \ins{S_lower} never conflicts with them. All 10 instructions can be satisfied together.}
+\label{tab:instructions}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{ID} & \textbf{Instruction (abridged)} & \textbf{Verifier} \\
+\midrule
+\ins{F_title} & Title in double angular brackets, such as \dbl{My Title} & Regex for \dbl{\ldots} \\
+\ins{F_bullets} & Exactly 3 markdown bullets starting with ``* '' & Exactly 3 bullet lines (\texttt{*}, \texttt{-}, \texttt{\textbullet}) \\
+\ins{F_end} & End with the exact phrase ``Any other questions?'' & Stripped text ends with the phrase \\
+\ins{L_max} & Under 100 words & Whitespace word count $<$ 100 \\
+\midrule
+\ins{P_ahoy} & Cheerful pirate; begin with the word ``Ahoy'' & First word after an optional title is ``ahoy'' \\
+\ins{P_name} & Introduce yourself by name as Captain Byte & Contains ``captain byte'' \\
+\ins{P_matey} & Address the user as ``matey'' at least once & Contains the word ``matey'' \\
+\midrule
+\ins{S_lower} & All lowercase letters & No uppercase characters \\
+\ins{S_nocomma} & No commas & No comma in the text \\
+\ins{S_keyword} & Use ``remarkable'' at least twice & Word count $\geq$ 2 \\
+\bottomrule
+\end{tabular}}
+\end{table}
